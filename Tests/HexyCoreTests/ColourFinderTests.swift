@@ -228,3 +228,11 @@ private func hslMode(_ s: String) -> [String] {
 @Test func rejectsBareLowercaseOrMixedCaseWords() {
     #expect(hexes("ffffff Facade deface") == [])
 }
+
+// MARK: OCR misreads of function names
+
+@Test func repairsMisreadRgbFunctionName() {
+    #expect(hexes("round: Igb(250, 128, 114);") == ["rgb(250, 128, 114)"])
+    #expect(hexes("lgba(0, 0, 0, 0.5)") == ["rgba(0, 0, 0, 0.5)"])
+    #expect(hexes("RGB(1, 2, 3)") == ["RGB(1, 2, 3)"])
+}

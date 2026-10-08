@@ -43,7 +43,8 @@ public enum ColourFinder {
 
     // Optional '#', 3–8 alphanumerics, not touching other alphanumerics or '#'.
     private static let hexToken = regex("(?<![A-Za-z0-9#])#?[A-Za-z0-9]{3,8}(?![A-Za-z0-9])")
-    private static let function = regex(#"(?<![A-Za-z])(rgba?|hsla?)\(([^()]*)\)"#)
+    // OCR often reads the "r" of rgb( as I, l or 1; those are repaired to "r".
+    private static let function = regex(#"(?<![A-Za-z])([rIl1]gba?|hsla?)\(([^()]*)\)"#)
     private static let bareRGB = regex(bareStart + #"(\d{1,3})"# + sep + #"(\d{1,3})"# + sep + #"(\d{1,3})"# + bareEnd)
     private static let bareHSL = regex(bareStart + num + "(?:deg)?" + sep + num + "%" + sep + num + "%" + bareEnd)
     private static let labelledRGB = regex(
@@ -65,7 +66,8 @@ public enum ColourFinder {
         }
         all += matches(function, in: text) { m in
             let fixedArgs = String(m[2].map { ocrFixes[$0] ?? $0 })
-            let tidied = m[1] + "(" + tidy(fixedArgs) + ")"
+            let name = "Il1".contains(m[1].first!) ? "r" + m[1].dropFirst() : m[1]
+            let tidied = name + "(" + tidy(fixedArgs) + ")"
             return ColourParser.parse(tidied).map { (tidied, $0) }
         }
         all += matches(bareRGB, in: text, bare: true) { m in
